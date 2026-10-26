@@ -1,0 +1,14 @@
+{
+  "name": "Métrica — Progreso corporal",
+  "short_name": "Métrica",
+  "description": "Registra tus medidas y visualiza tu progreso corporal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f2eb",
+  "theme_color": "#171b1a",
+  "lang": "es-MX",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
