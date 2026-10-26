@@ -11,17 +11,17 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--paper); }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-geist-sans), Arial, sans-serif; }
+html { scroll-behavior: smooth; background: var(--ink); }
+body { margin: 0; background: linear-gradient(rgba(23,27,26,.75),rgba(23,27,26,.75)), url("/og.png") center/cover fixed; color: var(--ink); font-family: var(--font-geist-sans), Arial, sans-serif; }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; }
 a { color: inherit; text-decoration: none; }
 
-.app-shell { min-height: 100vh; }
+.app-shell { min-height: 100vh; background: rgba(244,242,235,.96); }
 .sidebar { position: fixed; inset: 0 auto 0 0; width: 246px; z-index: 20; background: var(--ink); color: #fff; padding: 30px 24px 24px; display: flex; flex-direction: column; }
 .brand, .mobile-brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .13em; font-size: 14px; }
-.brand-mark { width: 34px; height: 34px; border-radius: 11px 11px 11px 3px; display: grid; place-items: center; background: var(--lime); color: var(--ink); font-weight: 900; letter-spacing: 0; box-shadow: inset -3px -3px 0 rgba(0,0,0,.11); }
+.brand-logo { width: 36px; height: 36px; border-radius: 11px 11px 11px 3px; display: block; background: var(--lime); box-shadow: inset -3px -3px 0 rgba(0,0,0,.11); }
 .sidebar nav { display: grid; gap: 6px; margin-top: 62px; }
 .nav-link { border: 0; background: transparent; color: #aeb4b0; border-radius: 12px; padding: 13px 14px; display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer; font-size: 14px; font-weight: 600; }
 .nav-link span { font-size: 20px; width: 22px; text-align: center; font-family: Arial, sans-serif; }
@@ -41,7 +41,7 @@ a { color: inherit; text-decoration: none; }
 .signout-button { border: 0; background: transparent; color: var(--muted); font-size: 10px; font-weight: 800; cursor: pointer; }
 .signout-button:hover { color: var(--ink); }
 .avatar { border: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 800; font-size: 10px; cursor: pointer; }
-.hero { min-height: 340px; padding: 58px 0 42px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: end; gap: 40px; border-bottom: 1px solid var(--line); }
+.hero { min-height: 340px; padding: 58px 24px 42px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: end; gap: 40px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg,rgba(244,242,235,.98) 0%,rgba(244,242,235,.93) 58%,rgba(244,242,235,.45) 100%), url("/og.png") right center/auto 100% no-repeat; border-radius: 0 0 var(--radius) var(--radius); }
 .eyebrow { display: block; font-size: 10px; font-weight: 900; letter-spacing: .18em; color: #6c716d; margin-bottom: 16px; }
 .hero h1 { margin: 0; font-size: clamp(46px, 6.2vw, 92px); line-height: .88; letter-spacing: -.075em; max-width: 830px; }
 .hero h1 em { color: var(--coral); font-style: normal; }
@@ -115,6 +115,17 @@ a { color: inherit; text-decoration: none; }
 .method-card li { display: flex; align-items: center; gap: 12px; }
 .method-card li span { width: 27px; height: 27px; border-radius: 50%; background: var(--ink); color: white; display: grid; place-items: center; font: 10px var(--font-geist-mono); flex: none; }
 .method-card > p { grid-column: 1/-1; margin: 0; padding-top: 18px; border-top: 1px solid rgba(23,27,26,.23); font-size: 9px; color: rgba(23,27,26,.7); }
+.video-card { margin-top: 18px; padding: 32px 36px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.video-card h2 { margin: 0; font-size: 25px; letter-spacing: -.045em; }
+.video-card p { max-width: 650px; margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.video-card a { flex: none; border-radius: 14px; padding: 14px 18px; background: var(--ink); color: white; font-size: 11px; font-weight: 850; }
+.site-footer { margin-top: 18px; padding: 28px 4px 8px; border-top: 1px solid var(--ink); display: grid; grid-template-columns: 1.15fr 1.7fr 1.5fr .75fr 1.35fr; gap: 24px; align-items: start; }
+.site-footer > div { display: grid; gap: 6px; min-width: 0; }
+.site-footer span { color: var(--muted); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.site-footer strong, .site-footer a { font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+.site-footer a { text-decoration: underline; text-underline-offset: 3px; }
+.footer-brand { display: flex !important; align-items: center; gap: 10px !important; letter-spacing: .12em; }
+.footer-brand .brand-logo { width: 31px; height: 31px; }
 .mobile-nav { display: none; }
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(15,19,17,.72); backdrop-filter: blur(8px); padding: 24px; display: grid; place-items: center; }
@@ -160,7 +171,7 @@ a { color: inherit; text-decoration: none; }
   .main-content { margin-left: 0; padding: 0 18px 30px; }
   .topbar { height: 68px; justify-content: space-between; }
   .mobile-brand { display: flex; font-size: 11px; }
-  .mobile-brand .brand-mark { width: 30px; height: 30px; }
+  .mobile-brand .brand-logo { width: 30px; height: 30px; }
   .sync-pill { margin-left: auto; padding: 7px 9px; font-size: 9px; }
   .signout-button { display: none; }
   .avatar { width: 32px; height: 32px; }
@@ -185,6 +196,10 @@ a { color: inherit; text-decoration: none; }
   .delete-button { grid-column: 2; grid-row: 1; }
   .method-card { padding: 28px 22px; grid-template-columns: 1fr; gap: 26px; }
   .method-card > p { grid-column: 1; }
+  .video-card { padding: 26px 22px; align-items: stretch; flex-direction: column; }
+  .video-card a { text-align: center; }
+  .site-footer { grid-template-columns: 1fr 1fr; padding-bottom: 20px; }
+  .footer-brand { grid-column: 1/-1; }
   .empty-state { padding: 28px 22px; grid-template-columns: 1fr; gap: 20px; }
   .empty-number { display: none; }
   .mobile-nav { position: fixed; z-index: 60; inset: auto 0 0; height: 69px; padding: 8px 12px max(8px,env(safe-area-inset-bottom)); background: rgba(23,27,26,.96); backdrop-filter: blur(15px); color: #aeb4b0; display: grid; grid-template-columns: repeat(5,1fr); align-items: center; }

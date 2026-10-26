@@ -221,9 +221,11 @@ function Login({ initialMessage = "" }: { initialMessage?: string }) {
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-shell site-container">
       <section className="auth-intro">
-        <a className="auth-brand" href="/" aria-label="Métrica, inicio"><span className="brand-mark">M</span><span>MÉTRICA</span></a>
+        <div className="auth-header" role="banner">
+          <a className="auth-brand" href="/" aria-label="Métrica, inicio"><img className="brand-logo" src="/favicon.svg" alt="Logo de Métrica" /><span>MÉTRICA</span></a>
+        </div>
         <div>
           <span className="eyebrow">TU PROGRESO, EN CLARO</span>
           <h1>Lo que mides,<br /><em>lo puedes mejorar.</em></h1>
@@ -244,8 +246,12 @@ function Login({ initialMessage = "" }: { initialMessage?: string }) {
             <button className="auth-submit" disabled={busy}>{busy ? "Entrando…" : "Entrar a Métrica →"}</button>
           </form>
           <button className="auth-reset" type="button" onClick={resetPassword} disabled={busy}>Olvidé mi contraseña</button>
+          <a className="auth-video-link" href="https://www.youtube.com/watch?v=t4LYqIxWHQQ" target="_blank" rel="noreferrer">Ver video: cómo medir la cintura ↗</a>
         </div>
-        <p className="auth-disclaimer">Métrica ayuda a registrar tendencias y no sustituye una evaluación médica o nutricional.</p>
+        <footer className="auth-footer">
+          <p>Métrica ayuda a registrar tendencias y no sustituye una evaluación médica o nutricional.</p>
+          <p><strong>Conceptualización de servicios en la nube</strong><br />Ana Luisa Martínez Rentería · 224791068<br /><a href="mailto:anylu.mr10@gmail.com">anylu.mr10@gmail.com</a></p>
+        </footer>
       </section>
     </main>
   );

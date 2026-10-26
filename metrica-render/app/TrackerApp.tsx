@@ -276,10 +276,10 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
   ];
 
   return (
-    <div className="app-shell">
+    <div className="app-shell site-container">
       <aside className="sidebar">
         <a href="#inicio" className="brand" aria-label="Métrica, inicio">
-          <span className="brand-mark">M</span>
+          <img className="brand-logo" src="/favicon.svg" alt="Logo de Métrica" />
           <span>MÉTRICA</span>
         </a>
         <nav aria-label="Navegación principal">
@@ -296,12 +296,12 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
       </aside>
 
       <main id="inicio" className="main-content">
-        <header className="topbar">
-          <a href="#inicio" className="mobile-brand"><span className="brand-mark">M</span><span>MÉTRICA</span></a>
+        <div className="topbar site-header" role="banner">
+          <a href="#inicio" className="mobile-brand"><img className="brand-logo" src="/favicon.svg" alt="Logo de Métrica" /><span>MÉTRICA</span></a>
           <div className="sync-pill"><span /> Guardado en la nube</div>
           {onSignOut && <button className="signout-button" onClick={onSignOut}>Cerrar sesión</button>}
           <button className="avatar" aria-label="Perfil y objetivos" title={userEmail} onClick={() => setGoalOpen(true)}>{userEmail ? userEmail.slice(0, 2).toUpperCase() : "YO"}</button>
-        </header>
+        </div>
 
         {message && (
           <button className="toast" onClick={() => setMessage("")} aria-label="Cerrar mensaje">{message}<span>×</span></button>
@@ -400,6 +400,23 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
           </ol>
           <p>Esta app ayuda a registrar tendencias y no sustituye la valoración de un profesional de la salud.</p>
         </section>
+
+        <section className="video-card" aria-labelledby="video-title">
+          <div>
+            <span className="eyebrow">RECURSO EN STREAMING</span>
+            <h2 id="video-title">Aprende a medir correctamente tu cintura</h2>
+            <p>Consulta esta guía en video de MD Anderson Cancer Center para mejorar la consistencia de tus registros.</p>
+          </div>
+          <a href="https://www.youtube.com/watch?v=t4LYqIxWHQQ" target="_blank" rel="noreferrer">Ver video en YouTube ↗</a>
+        </section>
+
+        <footer className="site-footer">
+          <div className="footer-brand"><img className="brand-logo" src="/favicon.svg" alt="Logo de Métrica" /><strong>MÉTRICA</strong></div>
+          <div><span>Curso</span><strong>Conceptualización de servicios en la nube</strong></div>
+          <div><span>Estudiante</span><strong>Ana Luisa Martínez Rentería</strong></div>
+          <div><span>Código</span><strong>224791068</strong></div>
+          <div><span>Contacto</span><a href="mailto:anylu.mr10@gmail.com">anylu.mr10@gmail.com</a></div>
+        </footer>
       </main>
 
       <nav className="mobile-nav" aria-label="Navegación móvil">
