@@ -18,6 +18,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import TrackerApp, {
   type Goals,
@@ -123,6 +124,24 @@ function createProvider(user: User): TrackerDataProvider {
       if (!supplied) throw new Error("Agrega al menos una medición.");
 
       await addDoc(measurementsCollection, measurement);
+    },
+
+    async updateMeasurement(id, values) {
+      const recordedAt = typeof values.recordedAt === "string" ? values.recordedAt : "";
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(recordedAt)) throw new Error("Selecciona una fecha válida.");
+      const measurement: Record<string, unknown> = {
+        recordedAt,
+        notes: typeof values.notes === "string" ? values.notes.trim().slice(0, 500) : "",
+        updatedAt: serverTimestamp(),
+      };
+      let supplied = 0;
+      for (const field of numericFields) {
+        const parsed = parseOptionalNumber(values[field], field === "bodyFat" ? 80 : 500);
+        measurement[field] = parsed;
+        if (parsed !== null) supplied += 1;
+      }
+      if (!supplied) throw new Error("Agrega al menos una medición.");
+      await updateDoc(doc(measurementsCollection, id), measurement);
     },
 
     async saveGoals(values) {
