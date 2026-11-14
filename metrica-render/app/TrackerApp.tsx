@@ -89,6 +89,7 @@ function changeLabel(first: number | null, last: number | null, unit: string) {
 export type TrackerDataProvider = {
   load: () => Promise<{ measurements: Measurement[]; goals: Goals | null }>;
   saveMeasurement: (values: Record<string, FormDataEntryValue>) => Promise<void>;
+  updateMeasurement: (id: string, values: Record<string, FormDataEntryValue>) => Promise<void>;
   saveGoals: (values: Record<string, FormDataEntryValue>) => Promise<Goals>;
   removeMeasurement: (id: string) => Promise<void>;
 };
@@ -106,6 +107,8 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<Measurement | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<Measurement | null>(null);
   const [goalOpen, setGoalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
@@ -158,27 +161,41 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
     const body = Object.fromEntries(data.entries());
     try {
       if (dataProvider) {
-        await dataProvider.saveMeasurement(body);
+        if (editingRecord) await dataProvider.updateMeasurement(editingRecord.id, body);
+        else await dataProvider.saveMeasurement(body);
         setModalOpen(false);
-        setMessage("Medición guardada y sincronizada.");
+        setEditingRecord(null);
+        setMessage(editingRecord ? "Medición actualizada y sincronizada." : "Medición guardada y sincronizada.");
         await loadData();
         return;
       }
-      const response = await fetch("/api/progress", {
-        method: "POST",
+      const response = await fetch(editingRecord ? `/api/progress?id=${encodeURIComponent(editingRecord.id)}` : "/api/progress", {
+        method: editingRecord ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "No pudimos guardar.");
       setModalOpen(false);
-      setMessage("Medición guardada y sincronizada.");
+      setEditingRecord(null);
+      setMessage(editingRecord ? "Medición actualizada y sincronizada." : "Medición guardada y sincronizada.");
       await loadData();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No pudimos guardar.");
     } finally {
       setSaving(false);
     }
+  }
+
+  function openNewMeasurement() {
+    setEditingRecord(null);
+    setModalOpen(true);
+  }
+
+  function openEditMeasurement(record: Measurement) {
+    setSelectedRecord(null);
+    setEditingRecord(record);
+    setModalOpen(true);
   }
 
   async function saveGoals(event: FormEvent<HTMLFormElement>) {
@@ -314,7 +331,7 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
             <p>Registra tus medidas con constancia y descubre los cambios que la báscula no siempre muestra.</p>
           </div>
           <div className="hero-actions">
-            <button className="primary-button" onClick={() => setModalOpen(true)}>＋ Nueva medición</button>
+            <button className="primary-button" onClick={openNewMeasurement}>＋ Nueva medición</button>
             <span>Último registro<br /><strong>{latest ? formatDate(latest.recordedAt) : "Aún no hay datos"}</strong></span>
           </div>
         </section>
@@ -325,7 +342,7 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
           <section className="empty-state">
             <span className="empty-number">01</span>
             <div><span className="eyebrow">PRIMER PASO</span><h2>Crea tu punto de partida</h2><p>Tu primera medición será la referencia para celebrar cada avance. No necesitas llenar todo: comienza con cintura, abdomen y peso.</p></div>
-            <button className="dark-button" onClick={() => setModalOpen(true)}>Registrar mi base →</button>
+            <button className="dark-button" onClick={openNewMeasurement}>Registrar mi base →</button>
           </section>
         ) : (
           <>
@@ -374,7 +391,7 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
             <section id="historial" className="history-section">
               <div className="section-heading"><div><span className="eyebrow">BITÁCORA</span><h2>Historial reciente</h2></div><span>{records.length} {records.length === 1 ? "registro" : "registros"}</span></div>
               <div className="history-list">
-                {[...records].reverse().slice(0, 8).map((record, index) => (
+                {[...records].reverse().map((record, index) => (
                   <article className="history-row" key={record.id}>
                     <div className="history-date"><strong>{String(records.length - index).padStart(2, "0")}</strong><span>{formatDate(record.recordedAt)}</span></div>
                     <div className="history-measures">
@@ -383,7 +400,11 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
                       <span><small>Peso</small>{display(record.weight, "kg")}</span>
                     </div>
                     <p>{record.notes || "Sin notas"}</p>
-                    <button className="delete-button" onClick={() => removeRecord(record.id)} aria-label={`Eliminar registro del ${formatDate(record.recordedAt)}`}>×</button>
+                    <div className="record-actions">
+                      <button onClick={() => setSelectedRecord(record)}>Ver</button>
+                      <button onClick={() => openEditMeasurement(record)}>Editar</button>
+                      <button className="danger-action" onClick={() => removeRecord(record.id)}>Eliminar</button>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -422,23 +443,36 @@ export default function TrackerApp({ dataProvider, userEmail, onSignOut }: Track
       <nav className="mobile-nav" aria-label="Navegación móvil">
         <a href="#inicio"><span>⌂</span>Inicio</a>
         <a href="#progreso"><span>↗</span>Progreso</a>
-        <button className="mobile-add" onClick={() => setModalOpen(true)} aria-label="Nueva medición">＋</button>
+        <button className="mobile-add" onClick={openNewMeasurement} aria-label="Nueva medición">＋</button>
         <a href="#historial"><span>≡</span>Historial</a>
         <button onClick={() => setGoalOpen(true)}><span>◎</span>Meta</button>
       </nav>
 
       {modalOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setModalOpen(false)}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) { setModalOpen(false); setEditingRecord(null); } }}>
           <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="measurement-title">
-            <div className="modal-heading"><div><span className="eyebrow">NUEVO CHECK-IN</span><h2 id="measurement-title">Registra cómo vas</h2><p>Completa solo las medidas que tomaste hoy.</p></div><button onClick={() => setModalOpen(false)} aria-label="Cerrar">×</button></div>
-            <form onSubmit={saveMeasurement}>
-              <label className="date-field">Fecha de medición<input type="date" name="recordedAt" defaultValue={today()} required /></label>
-              <fieldset><legend>Composición</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "base").map((field) => <MeasureField key={field.name} {...field} />)}</div></fieldset>
-              <fieldset><legend>Torso</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "torso").map((field) => <MeasureField key={field.name} {...field} />)}</div></fieldset>
-              <fieldset><legend>Brazos y piernas</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "extremities").map((field) => <MeasureField key={field.name} {...field} />)}</div></fieldset>
-              <label className="notes-field">Notas<textarea name="notes" rows={3} maxLength={500} placeholder="Ej. Semana de descarga, dormí mejor, más energía…" /></label>
-              <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => setModalOpen(false)}>Cancelar</button><button className="primary-button" disabled={saving}>{saving ? "Guardando…" : "Guardar en la nube"}</button></div>
+            <div className="modal-heading"><div><span className="eyebrow">{editingRecord ? "EDITAR REGISTRO" : "NUEVO CHECK-IN"}</span><h2 id="measurement-title">{editingRecord ? "Actualiza tu medición" : "Registra cómo vas"}</h2><p>{editingRecord ? "Modifica los datos necesarios y guarda los cambios." : "Completa solo las medidas que tomaste hoy."}</p></div><button onClick={() => { setModalOpen(false); setEditingRecord(null); }} aria-label="Cerrar">×</button></div>
+            <form key={editingRecord?.id ?? "new"} onSubmit={saveMeasurement}>
+              <label className="date-field">Fecha de medición<input type="date" name="recordedAt" defaultValue={editingRecord?.recordedAt ?? today()} required /></label>
+              <fieldset><legend>Composición</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "base").map((field) => <MeasureField key={field.name} {...field} defaultValue={editingRecord?.[field.name]} />)}</div></fieldset>
+              <fieldset><legend>Torso</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "torso").map((field) => <MeasureField key={field.name} {...field} defaultValue={editingRecord?.[field.name]} />)}</div></fieldset>
+              <fieldset><legend>Brazos y piernas</legend><div className="fields-grid">{measurementFields.filter((field) => field.group === "extremities").map((field) => <MeasureField key={field.name} {...field} defaultValue={editingRecord?.[field.name]} />)}</div></fieldset>
+              <label className="notes-field">Notas<textarea name="notes" rows={3} maxLength={500} defaultValue={editingRecord?.notes ?? ""} placeholder="Ej. Semana de descarga, dormí mejor, más energía…" /></label>
+              <div className="modal-actions"><button type="button" className="cancel-button" onClick={() => { setModalOpen(false); setEditingRecord(null); }}>Cancelar</button><button className="primary-button" disabled={saving}>{saving ? "Guardando…" : editingRecord ? "Actualizar registro" : "Guardar en la nube"}</button></div>
             </form>
+          </section>
+        </div>
+      )}
+
+      {selectedRecord && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setSelectedRecord(null)}>
+          <section className="modal-card detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+            <div className="modal-heading"><div><span className="eyebrow">CONSULTA INDIVIDUAL</span><h2 id="detail-title">Medición del {formatDate(selectedRecord.recordedAt)}</h2><p>Registro completo guardado en la base de datos.</p></div><button onClick={() => setSelectedRecord(null)} aria-label="Cerrar">×</button></div>
+            <div className="detail-grid">
+              {measurementFields.map((field) => <div key={field.name}><span>{field.label}</span><strong>{display(selectedRecord[field.name], field.unit)}</strong></div>)}
+            </div>
+            <div className="detail-notes"><span>Notas</span><p>{selectedRecord.notes || "Sin notas"}</p></div>
+            <div className="modal-actions"><button className="cancel-button" onClick={() => setSelectedRecord(null)}>Cerrar</button><button className="primary-button" onClick={() => openEditMeasurement(selectedRecord)}>Editar este registro</button></div>
           </section>
         </div>
       )}
